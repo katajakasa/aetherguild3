@@ -43,8 +43,11 @@ will be sent in the stream and it can be safely considered as dead. Stream ID ca
             },
             ....
         ],
+        "errors": [
+            <str optional Error message>,
+            ...
+        ],
         "code": <int mandatory Errorcode>,
-        "message": <str optional Error message>
     },
     "type": "error",
     "stream": <str mandatory Stream ID>
