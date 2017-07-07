@@ -1,0 +1,102 @@
+# HTTP server settings
+HOST = '0.0.0.0'
+PORT = 8000
+BACKLOG = 256
+
+# Debugging (sets up some additional data logging)
+DEBUG = True
+
+# Salt for old passwords
+OLD_PW_SALT = ""
+
+# Preferred password hash functions. First one will be used, the others deprecated (bur readable)
+PASSWORD_HASH_PREF = ["argon2", "aethery2", "aethery1"]
+
+# Database configuration
+# 1. psql -U postgres
+# 2. CREATE USER aetherguild3 WITH PASSWORD '<my_password>';
+# 3. CREATE DATABASE aetherguild3;
+# 4. GRANT ALL PRIVILEGES ON DATABASE aetherguild3 to aetherguild3;
+DATABASE = {
+    'username': 'aetherguild3',
+    'password': '',
+    'host': 'localhost',
+    'port': 5432,
+    'database': 'aetherguild3',
+    'pool_max': 50,
+    'pool_min': 5,
+}
+
+# Old database account for loading data
+OLD_DATABASE = {
+    'username': 'aetherguild',
+    'password': '',
+    'host': 'localhost',
+    'port': '3306',
+    'database': 'aetherguild',
+}
+
+# Redis cache config
+REDIS = {
+    'host': 'localhost',
+    'port': 6379,
+    'pool_max': 50,
+    'pool_min': 5,
+    'database': 0
+}
+
+# Logging setup for everything
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "console": {
+            "format": "[%(asctime)s][%(levelname)s] %(message)s ",
+            "datefmt": "%d.%m.%Y %I:%M:%S"
+        },
+        "access_log": {
+            "format": "%(message)s"
+        }
+    },
+    "handlers": {
+        "console": {
+            "level": "DEBUG",
+            "class": "logging.StreamHandler",
+            "formatter": "console"
+        },
+        "access_log": {
+            "level": "INFO",
+            "class": "logging.StreamHandler",
+            "formatter": "access_log"
+        },
+        'sentry': {
+            'level': 'WARNING',
+            'class': 'aetherguild.framework.utils.sentry.AsyncSentryHandler',
+            'dsn': '',
+        },
+    },
+    "loggers": {
+        "aiohttp.access": {
+            "handlers": ["access_log"],
+            "level": "INFO",
+            "propagate": False
+        },
+        "sqlalchemy": {
+            "level": "INFO",
+        },
+        "aiohttp": {
+            "level": "INFO",
+        },
+        "aetherguild": {
+            "level": "INFO",
+        },
+        "asyncpg": {
+            "level": "DEBUG",
+        },
+        "": {
+            "handlers": ['console', 'sentry'],
+            "level": "INFO",
+            "propagate": False
+        }
+    }
+}
