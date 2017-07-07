@@ -1,8 +1,8 @@
 # Protocol
 
-## Streaming Request/response format
+## 1. Streaming text format
 
-### Request
+### 1.1. Request
 
 ```
 {
@@ -14,7 +14,7 @@
 }
 ```
 
-### Response
+### 1.2. Message event
 
 If the request was valid, the server will respond with message(s) of the following format.
 Note that more than one message may be sent, depending on request type (login, get_forum_boards, etc.).
@@ -27,10 +27,10 @@ Note that more than one message may be sent, depending on request type (login, g
 }
 ```
 
-### Error
+### 1.3. Error event
 
-If error happens on server side, the server will respond with a following error structure. Note that
-error should be automatically taken as stream closing events -- when an error happens, no further messages
+If error happens on server side, the server will respond with a following error structure. Note that an
+error should be automatically taken as a stream closing event -- when an error happens, no further messages
 will be sent in the stream and it can be safely considered as dead. Stream ID can be re-used if necessary.
 
 ```
@@ -54,7 +54,7 @@ will be sent in the stream and it can be safely considered as dead. Stream ID ca
 }
 ```
 
-### Closing
+### 1.4. Close event
 
 When server has transferred all the data it intends to transfer, the stream is closed with the following message.
 Stream ID will match the one you set in the request. After server has sent this message, the stream should be considered
