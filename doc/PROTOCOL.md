@@ -1,40 +1,39 @@
 # Protocol
 
-## 1. Streaming text format
+## 1. Requests
 
-### 1.1. Request
+### 1.1. Request (client => server)
 
 ```
 {
+    "type": "request",
     "route": <str mandatory Route name, eg. aether.auth.login>,
-    "type": "open",
     "stream": <str mandatory Stream ID, decided by client, should be unique>,
     "session": <str optional Session ID. Only required on first message after login, but can be sent on all>,
     "message": <dict mandatory Message data, depends on operation>
 }
 ```
 
-### 1.2. Message event
+### 1.2. Response event (server => client)
 
 If the request was valid, the server will respond with message(s) of the following format.
-Note that more than one message may be sent, depending on request type (login, get_forum_boards, etc.).
 
 ```
 {
+    "type": "response",
+    "stream": <str mandatory Stream ID>,
     "message": <dict mandatory Message content. This will depend on operation>,
-    "type": "message",
-    "stream": <str mandatory Stream ID>
 }
 ```
 
-### 1.3. Error event
+### 1.3. Error event (server => client)
 
-If error happens on server side, the server will respond with a following error structure. Note that an
-error should be automatically taken as a stream closing event -- when an error happens, no further messages
-will be sent in the stream and it can be safely considered as dead. Stream ID can be re-used if necessary.
+If error happens on server side, the server will respond with a following error structure.
 
 ```
 {
+    "type": "error",
+    "stream": <str mandatory Stream ID>,
     "message": {
         "field_errors": [
             {
@@ -48,22 +47,74 @@ will be sent in the stream and it can be safely considered as dead. Stream ID ca
             ...
         ],
         "code": <int mandatory Errorcode>,
-    },
-    "type": "error",
-    "stream": <str mandatory Stream ID>
+    }
 }
 ```
 
-### 1.4. Close event
+## 2. Subscriptions
 
-When server has transferred all the data it intends to transfer, the stream is closed with the following message.
-Stream ID will match the one you set in the request. After server has sent this message, the stream should be considered
-dead. Stream ID can be re-used if necessary.
+### 2.1. Subscribe (client => server)
+
+Subscribes the client to a queue.
 
 ```
 {
-    "message": {},
+    "type": "subscribe",
+    "route": <str mandatory Queue name, eg. aether.queue.forum_threads>,
+    "stream": <str mandatory Stream ID, decided by client, should be unique>,
+    "session": <str optional Session ID. Only required on first message after login, but can be sent on all>,
+}
+```
+
+### 2.2. Unsubscribe (client => server)
+
+Unsubscribes the client from a queue.
+
+```
+{
+    "type": "unsubscribe",
+    "stream": <str mandatory Stream ID, decided by client, should be unique>,
+    "session": <str optional Session ID. Only required on first message after login, but can be sent on all>,
+}
+```
+
+### 2.3. Message event (server => client)
+
+Message from server to client as per subscription
+
+```
+{
+    "type": "broadcast",
+    "stream": <str mandatory Stream ID>,
+    "message": <dict mandatory Message content. This will depend on operation>,
+}
+```
+
+### 2.4. Close event (server => client)
+
+If the server side closes the subscription, this message will be sent for all subscriptions.
+
+```
+{
     "type": "close",
-    "stream": <str mandatory Stream ID>
+    "stream": <str mandatory Stream ID>,
+}
+```
+
+### 2.5. Error event (server => client)
+
+If error happens on server side, the server will respond with a following error structure.
+
+```
+{
+    "type": "error",
+    "stream": <str mandatory Stream ID>,
+    "message": {
+        "errors": [
+            <str optional Error message>,
+            ...
+        ],
+        "code": <int mandatory Errorcode>,
+    }
 }
 ```
